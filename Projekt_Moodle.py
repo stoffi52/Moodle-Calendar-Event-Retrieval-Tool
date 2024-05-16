@@ -5,7 +5,7 @@ import json
 moodle_url = 'https://moodle2.htlinn.ac.at'
 webservice_url = moodle_url + '/webservice/rest/server.php'
 token = 'token'
-userid = 'userid'
+userid = 'sthoffmann'
  
 # API-Endpunkt und Parameter für den Kalenderabruf
 calendar_function = 'core_calendar_get_calendar_events'
