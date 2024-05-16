@@ -4,8 +4,8 @@ import json
 # Konfiguration
 moodle_url = 'https://your-moodle-site.com'
 webservice_url = moodle_url + '/webservice/rest/server.php'
-token = 'your_token'
-userid = 'your_userid'
+token = 'token'
+userid = 'userid'
  
 # API-Endpunkt und Parameter für den Kalenderabruf
 calendar_function = 'core_calendar_get_calendar_events'
