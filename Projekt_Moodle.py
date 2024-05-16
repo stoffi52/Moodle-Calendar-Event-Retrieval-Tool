@@ -2,7 +2,7 @@ import requests
 import json
  
 # Konfiguration
-moodle_url = 'https://your-moodle-site.com'
+moodle_url = 'https://moodle2.htlinn.ac.at'
 webservice_url = moodle_url + '/webservice/rest/server.php'
 token = 'token'
 userid = 'userid'
