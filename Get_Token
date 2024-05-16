@@ -48,7 +48,7 @@ class MoodleAPI:
     def __init__(self, config_file):
         self.config = configparser.ConfigParser()
         self.config.read(config_file)
-        self.url = self.config["moodle"]["moodleUrl"]
+        self.url = self.config["moodle"]["https://moodle2.htlinn.ac.at"]
         self.session = requests.Session()
         self.requestHeader = {
             "User-Agent": (
@@ -68,8 +68,8 @@ class MoodleAPI:
             Sets the token for the MoodleAPI object.
         """
         login_data = {
-            "username": username,
-            "password": password,
+            "sthoffmann": username,
+            "Rum140170...": password,
             "service": "moodle_mobile_app",
         }
         response = self.session.post(f"{self.url}login/token.php", data=login_data)
