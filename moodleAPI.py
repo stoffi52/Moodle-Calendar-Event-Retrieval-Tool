@@ -46,7 +46,9 @@ class MoodleAPI:
         ```
         https://moodle2.htlinn.ac.at
         "https://moodle2.htlinn.ac.at/login/token.php"
+
     """
+    
 
     def __init__(self, config_file):
         self.config = configparser.ConfigParser()
@@ -65,6 +67,23 @@ class MoodleAPI:
         self.session.headers.update(self.requestHeader)
         self.token = None
         self.userid = None
+
+    def get_assignments(self):
+        """
+        Retrieves assignments from the Moodle instance.
+        """
+        if self.token is None:
+            logging.error("Token not set. Please login first.")
+            return None
+        
+        wsfunction = "mod_assign_get_assignments"
+        params = {
+            "wstoken": self.token,
+            "wsfunction": wsfunction,
+            "moodlewsrestformat": "json",
+        }
+        response = self.session.post(f"{self.url}webservice/rest/server.php", params=params)
+        return response.json()
 
     def login(self):
         """
