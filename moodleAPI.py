@@ -1,7 +1,7 @@
-import configparser
-import requests
-import logging
-from json import loads
+import configparser #benötigt man um Konfigurationsdateien zu lesen 
+import requests #HTTP-Anfragen managen 
+import logging #zeichnet Probleme auf 
+from json import loads #erleichtert die weiterverarebeitung der API-Daten 
 
 
 class MoodleAPI:
@@ -50,7 +50,7 @@ class MoodleAPI:
     """
     
 
-    def __init__(self, config_file):
+    def __init__(self, config_file): #Initialisierung von Daten für zukünftige Abfragen 
         self.config = configparser.ConfigParser()
         self.config.read(config_file)
         with open("credentials.json", "r") as file:
@@ -68,7 +68,7 @@ class MoodleAPI:
         self.token = None
         self.userid = None
 
-    def get_assignments(self):
+    def get_assignments(self): #Aufgaben abrufen und zurückgeben 
         """
         Retrieves assignments from the Moodle instance.
         """
@@ -85,7 +85,7 @@ class MoodleAPI:
         response = self.session.post(f"{self.url}webservice/rest/server.php", params=params)
         return response.json()
 
-    def login(self):
+    def login(self): #In den Moodle Account einloggen 
         """
         login(self, username: str, password: str) -> bool:
             Logs in to the Moodle instance using the provided username and password.
@@ -105,7 +105,7 @@ class MoodleAPI:
             logging.error("Login failed")
             return False
 
-    def get_site_info(self):
+    def get_site_info(self): #Seiteninformationen abfragen 
         """
         get_site_info(self) -> dict:
             Retrieves site information from the Moodle instance.
@@ -125,19 +125,19 @@ class MoodleAPI:
         self.userid = response.json()["userid"]
         return response.json()
 
-    def get_popup_notifications(self, user_id):
+    def get_popup_notifications(self, user_id): #Moodle-Nachrichten auslesen 
         """
         Retrieves popup notifications for a user.
         """
         return self._post("message_popup_get_popup_notifications", user_id)
 
-    def popup_notification_unread_count(self, user_id):
+    def popup_notification_unread_count(self, user_id): #Anzahl der Moodle-Nachrichten auslesen 
         """
         Retrieves the number of unread popup notifications for a user.
         """
         return self._post("message_popup_get_unread_popup_notification_count", user_id)
 
-    def post(self, arg0, user_id):
+    def post(self, arg0, user_id): #Sendet eine Anfrage mit einer Webservice-Funktion und dem Benutzer 
         """
         Sends a POST request to the Moodle API with an given wsfunction and user ID.
         """
