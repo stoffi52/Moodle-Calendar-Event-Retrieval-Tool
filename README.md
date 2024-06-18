@@ -11,3 +11,6 @@ Ensure you have the following installed:
 
 Python 3.x<br /> 
 pip (Python package installer)<br /> 
+
+## Usage 
+To use this script, download the files Main.py and moodleAPI.py. Afterwards, execute the Main.py file. Additionally, save the JSON file as "credentials.json" and copy this line into it. JSON file format: {"moodle": {"username": "xxx", "password": "xxx"}}. Pay attention to the file paths! 
