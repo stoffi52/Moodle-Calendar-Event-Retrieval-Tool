@@ -3,7 +3,7 @@ import time
 import tkinter as tk
 from tkinter import ttk
 from bs4 import BeautifulSoup
-import webbrowser
+from cefpython3 import cefpython as cef
 
 class MoodleApp:
     def __init__(self, root):
@@ -15,12 +15,18 @@ class MoodleApp:
         root.geometry("1000x700")
 
         # Frame für die Aufgaben
-        frame_assignments = ttk.LabelFrame(root, text="Kurse und Aufgaben")
-        frame_assignments.pack(fill="both", expand="yes", padx=20, pady=20)
+        frame_assignments = ttk.Frame(root)
+        frame_assignments.pack(fill="both", expand=True, padx=20, pady=20)
 
-        # Frame für vergangene Aufgaben
-        self.past_assignments_listbox = self.create_listbox(frame_assignments, "Vergangene Aufgaben")
-        self.upcoming_assignments_listbox = self.create_listbox(frame_assignments, "Noch zu erledigen")
+        # Frames für die verschiedenen Aufgabenarten
+        past_frame, self.past_assignments_listbox = self.create_listbox(frame_assignments, "Vergangene Aufgaben")
+        upcoming_frame, self.upcoming_assignments_listbox = self.create_listbox(frame_assignments, "Noch zu erledigende Aufgaben")
+        no_due_date_frame, self.no_due_date_assignments_listbox = self.create_listbox(frame_assignments, "Aufgaben ohne Abgabetermin")
+
+        # Gleichmäßige Aufteilung der Frames
+        past_frame.pack(fill="both", expand=True, padx=10, pady=5)
+        upcoming_frame.pack(fill="both", expand=True, padx=10, pady=5)
+        no_due_date_frame.pack(fill="both", expand=True, padx=10, pady=5)
 
         # Daten abrufen und anzeigen
         self.load_data()
@@ -28,14 +34,14 @@ class MoodleApp:
     def create_listbox(self, parent_frame, title):
         # Frame für Aufgaben
         frame = ttk.LabelFrame(parent_frame, text=title)
-        frame.pack(fill="both", expand="yes", padx=10, pady=10)
+        frame.pack(fill="both", expand=True, padx=10, pady=5)
 
         # Scrollbare Textbox für die Aufgaben
-        listbox = tk.Listbox(frame, width=120, height=15, font=("Helvetica", 12))
-        listbox.pack(padx=10, pady=10)
+        listbox = tk.Listbox(frame, width=120, height=10, font=("Helvetica", 12))
+        listbox.pack(fill="both", expand=True, padx=10, pady=10)
         listbox.bind('<Double-1>', self.on_double_click)
 
-        return listbox
+        return frame, listbox
 
     def load_data(self):
         site_info = self.api.get_site_info()
@@ -46,13 +52,16 @@ class MoodleApp:
 
         past_assignments = []
         upcoming_assignments = []
+        no_due_date_assignments = []
 
         if "courses" in assignments:
             for course in assignments["courses"]:
                 if "assignments" in course:
                     for assign in course["assignments"]:
                         assign['course_name'] = course['fullname']
-                        if assign["duedate"] != 0 and assign["duedate"] < time.time():
+                        if assign["duedate"] == 0:
+                            no_due_date_assignments.append(assign)
+                        elif assign["duedate"] < time.time():
                             past_assignments.append(assign)
                         else:
                             upcoming_assignments.append(assign)
@@ -67,9 +76,13 @@ class MoodleApp:
 
             for assign in upcoming_assignments:
                 self.display_assignment(assign, self.upcoming_assignments_listbox)
+
+            for assign in no_due_date_assignments:
+                self.display_assignment(assign, self.no_due_date_assignments_listbox)
         else:
-            self.past_assignments_listbox.insert(tk.END, "Keine Aufgaben gefunden.")
-            self.upcoming_assignments_listbox.insert(tk.END, "Keine Aufgaben gefunden.")
+            self.past_assignments_listbox.insert(tk.END, "Keine vergangenen Aufgaben gefunden.")
+            self.upcoming_assignments_listbox.insert(tk.END, "Keine noch zu erledigenden Aufgaben gefunden.")
+            self.no_due_date_assignments_listbox.insert(tk.END, "Keine Aufgaben ohne Abgabetermin gefunden.")
 
     def display_assignment(self, assign, listbox):
         name = assign["name"]
@@ -126,13 +139,27 @@ class MoodleApp:
         # URL ermitteln
         assignment_url = f"{self.api.url}mod/assign/view.php?id={assign['cmid']}&token={self.api.token}"
 
-        open_button = tk.Button(detail_window, text="Aufgabe im Browser öffnen", command=lambda: self.open_assignment_in_browser(assignment_url), bg="purple", fg="white")
+        open_button = tk.Button(detail_window, text="Aufgabe im Browser öffnen", command=lambda: self.open_assignment_in_tkinter_browser(detail_window, assignment_url), bg="purple", fg="white")
         open_button.pack(pady=10)
 
-    def open_assignment_in_browser(self, url):
-        webbrowser.open(url)
+    def open_assignment_in_tkinter_browser(self, parent, url):
+        # CEF initialisieren
+        cef.Initialize()
+
+        # Einbettungsrahmen für CEF erstellen
+        browser_frame = tk.Frame(parent)
+        browser_frame.pack(fill="both", expand=True)
+
+        # CEF-Browser innerhalb des Rahmens erstellen
+        cef_browser = cef.CreateBrowserSync(url=url, window_info=cef.WindowInfo(browser_frame.winfo_id()))
+        parent.after(10, self._cef_loop)
+
+    def _cef_loop(self):
+        cef.MessageLoopWork()
+        root.after(10, self._cef_loop)
 
 # Hauptprogramm
 root = tk.Tk()
 app = MoodleApp(root)
 root.mainloop()
+cef.Shutdown()
